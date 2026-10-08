@@ -39,13 +39,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(InvalidDateException.class)
-    private ResponseEntity<ExceptionDTO> invalidDateHandler(InvalidDateException exception) {
+    public ResponseEntity<ExceptionDTO> invalidDateHandler(InvalidDateException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionDTO(exception.getMessage()));
     }
 
     @ExceptionHandler(NoteNotFoundException.class)
-    private ResponseEntity<ExceptionDTO> noteNotFoundHandler(NoteNotFoundException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionDTO(exception.getMessage()));
+    public ResponseEntity<ExceptionDTO> noteNotFoundHandler(NoteNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionDTO(exception.getMessage()));
     }
 
 }

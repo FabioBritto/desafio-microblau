@@ -8,11 +8,13 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.Instant;
 
 
 @RestController
@@ -28,11 +30,16 @@ public class NoteController {
     @GetMapping()
     public ResponseEntity<Page<NoteDTO>> findAll(@RequestParam(required = false) String site,
                                                  @RequestParam(required = false) String equipment,
-                                                 @RequestParam(required = false) String startDate,
-                                                 @RequestParam(required = false) String endDate,
+                                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
+                                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate,
                                                  Pageable pageable
                                               ) {
         return ResponseEntity.status(HttpStatus.OK).body(noteService.findAll(pageable, site, equipment, startDate, endDate));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<NoteDTO> findById(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.OK).body(noteService.findById(id));
     }
 
     @PostMapping()
@@ -49,6 +56,7 @@ public class NoteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
+        noteService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

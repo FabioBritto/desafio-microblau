@@ -7,12 +7,14 @@ import com.microblau.desafio.backend.model.note.Note;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface INoteService {
 
 
-    Page<NoteDTO> findAll(Pageable pageable, String site, String equipment, String startDate, String endDate);
+    Page<NoteDTO> findAll(Pageable pageable, String site, String equipment, Instant startDate, Instant endDate);
+    NoteDTO findById(String id);
     Long countNotes();
     NoteDTO create(CreateNoteDTO createNoteDTO);
     void createNotesWithList(List<Note> notes);
