@@ -2,9 +2,13 @@ package com.microblau.desafio.backend;
 
 import com.microblau.desafio.backend.controller.note.dto.CreateNoteDTO;
 import com.microblau.desafio.backend.controller.note.dto.NoteDTO;
+import com.microblau.desafio.backend.controller.note.dto.UpdateNoteDTO;
 import com.microblau.desafio.backend.model.note.Note;
 import com.microblau.desafio.backend.repository.NoteRepository;
 import com.microblau.desafio.backend.service.note.INoteService;
+import com.microblau.desafio.backend.service.note.NoteServiceImpl;
+import com.microblau.desafio.backend.util.exceptions.InvalidDateException;
+import com.microblau.desafio.backend.util.exceptions.NoteNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,12 +18,19 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 
@@ -33,9 +44,26 @@ public class NoteServiceTest {
     private ArgumentCaptor<Note> noteCaptor;
 
     @InjectMocks
-    private INoteService noteService;
+    private NoteServiceImpl noteService;
 
     private CreateNoteDTO payloadRequest;
+
+    private final Pageable pageable = PageRequest.of(0, 10);
+
+    private static final String START = "2024-08-01T00:00:00Z";
+    private static final String END = "2024-08-02T00:00:00Z";
+
+    private Note buildNote(String id) {
+        Note note = new Note();
+        note.setId(id);
+        note.setSite("https://site-original.com");
+        note.setEquipment("Compressor 01");
+        note.setVariable("temperatura");
+        note.setAuthor("Maria Silva");
+        note.setMessage("Mensagem original");
+        note.setTimestamp(Timestamp.from(Instant.parse(START)));
+        return note;
+    }
 
     @BeforeEach
     void setup() {
@@ -90,7 +118,7 @@ public class NoteServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção por erro ao criar")
+    @DisplayName("Deveria lançar exceção por erro ao criar")
     void create_shouldThrowException() {
         when(noteRepository.save(any(Note.class)))
                 .thenThrow(new RuntimeException("Não foi possível cadastrar uma Nota"));
@@ -98,5 +126,188 @@ public class NoteServiceTest {
         assertThatThrownBy(() -> noteService.create(payloadRequest)).isInstanceOf(RuntimeException.class);
 
         verify(noteRepository, times(1)).save(any(Note.class));
+    }
+
+
+    @Test
+    @DisplayName("Deveria repassar os filtros ao repositório e mapear para DTO")
+    void findAll_shouldDelegateToRepositoryAndMapToDto() {
+        Note note = buildNote("abc");
+        when(noteRepository.findAll(eq("SiteA"), eq("Equip01"), any(), any(), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(note), pageable, 1));
+
+        Page<NoteDTO> result = noteService.findAll(pageable, "SiteA", "Equip01", null, null);
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(1);
+        NoteDTO dto = result.getContent().getFirst();
+        assertThat(dto.id()).isEqualTo("abc");
+        assertThat(dto.site()).isEqualTo(note.getSite());
+        assertThat(dto.equipment()).isEqualTo(note.getEquipment());
+        assertThat(dto.variable()).isEqualTo(note.getVariable());
+        assertThat(dto.author()).isEqualTo(note.getAuthor());
+        assertThat(dto.message()).isEqualTo(note.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deveria converter site e equipment em branco para null")
+    void findAll_shouldConvertBlankStringsToNull() {
+        when(noteRepository.findAll(any(), any(), any(), any(), eq(pageable)))
+                .thenReturn(Page.empty());
+
+        noteService.findAll(pageable, "   ", "", null, null);
+
+        verify(noteRepository).findAll(isNull(), isNull(), isNull(), isNull(), eq(pageable));
+    }
+
+    @Test
+    @DisplayName("Deveria converter as datas no formato do CSV (ISO-8601) para Timestamp antes de consultar")
+    void findAll_shouldConvertDatesToTimestamp() {
+        when(noteRepository.findAll(any(), any(), any(), any(), eq(pageable)))
+                .thenReturn(Page.empty());
+
+        noteService.findAll(pageable, null, null, START, END);
+
+        verify(noteRepository).findAll(
+                isNull(),
+                isNull(),
+                eq(Timestamp.from(Instant.parse(START))),
+                eq(Timestamp.from(Instant.parse(END))),
+                eq(pageable));
+    }
+
+    @Test
+    @DisplayName("Deveria tratar datas em branco como ausentes")
+    void findAll_shouldTreatBlankDatesAsNull() {
+        when(noteRepository.findAll(any(), any(), any(), any(), eq(pageable)))
+                .thenReturn(Page.empty());
+
+        noteService.findAll(pageable, null, null, " ", "");
+
+        verify(noteRepository).findAll(isNull(), isNull(), isNull(), isNull(), eq(pageable));
+    }
+
+    @Test
+    @DisplayName("Deveria aceitar apenas startDate")
+    void findAll_shouldAcceptOnlyStartDate() {
+        when(noteRepository.findAll(any(), any(), any(), any(), eq(pageable)))
+                .thenReturn(Page.empty());
+
+        noteService.findAll(pageable, null, null, START, null);
+
+        verify(noteRepository).findAll(
+                isNull(), isNull(), eq(Timestamp.from(Instant.parse(START))), isNull(), eq(pageable));
+    }
+
+    @Test
+    @DisplayName("Deveria aceitar startDate igual a endDate")
+    void findAll_shouldAcceptEqualDates() {
+        when(noteRepository.findAll(any(), any(), any(), any(), eq(pageable)))
+                .thenReturn(Page.empty());
+
+        noteService.findAll(pageable, null, null, START, START);
+
+        verify(noteRepository).findAll(any(), any(), any(), any(), eq(pageable));
+    }
+
+    @Test
+    @DisplayName("Não deveria consultar o repositório quando startDate > endDate")
+    void findAll_shouldThrowWhenStartIsAfterEnd() {
+        assertThatThrownBy(() -> noteService.findAll(pageable, null, null, END, START))
+                .isInstanceOf(InvalidDateException.class);
+
+        verifyNoInteractions(noteRepository);
+    }
+
+    @Test
+    @DisplayName("Não deveria consultar o repositório quando o formato da data é inválido")
+    void findAll_shouldThrowWhenDateFormatIsInvalid() {
+        assertThatThrownBy(() -> noteService.findAll(pageable, null, null, "01/08/2024", null))
+                .isInstanceOf(InvalidDateException.class);
+
+        assertThatThrownBy(() -> noteService.findAll(pageable, null, null, null, "não-é-data"))
+                .isInstanceOf(InvalidDateException.class);
+
+        verifyNoInteractions(noteRepository);
+    }
+
+    @Test
+    @DisplayName("Deveria atualizar os campos editáveis e retornar o DTO")
+    void update_shouldUpdateFieldsAndReturnDto() {
+        Note existing = buildNote("abc");
+        UpdateNoteDTO dto = new UpdateNoteDTO(
+                "https://site-novo.com",
+                "Compressor 02",
+                "pressao",
+                "Mensagem nova"
+        );
+        when(noteRepository.findById("abc")).thenReturn(Optional.of(existing));
+        when(noteRepository.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        NoteDTO result = noteService.update("abc", dto);
+
+        verify(noteRepository).save(noteCaptor.capture());
+        Note saved = noteCaptor.getValue();
+
+        assertThat(saved.getSite()).isEqualTo("https://site-novo.com");
+        assertThat(saved.getEquipment()).isEqualTo("Compressor 02");
+        assertThat(saved.getVariable()).isEqualTo("pressao");
+        assertThat(saved.getMessage()).isEqualTo("Mensagem nova");
+
+        assertThat(result.id()).isEqualTo("abc");
+        assertThat(result.site()).isEqualTo("https://site-novo.com");
+        assertThat(result.message()).isEqualTo("Mensagem nova");
+    }
+
+    @Test
+    @DisplayName("Não deveria alterar id, autor e timestamp")
+    void update_shouldNotChangeIdAuthorAndTimestamp() {
+        Note existing = buildNote("abc");
+        Timestamp originalTimestamp = existing.getTimestamp();
+        UpdateNoteDTO dto = new UpdateNoteDTO("https://site-novo.com", "Compressor 02", "pressao", "Nova");
+        when(noteRepository.findById("abc")).thenReturn(Optional.of(existing));
+        when(noteRepository.save(any(Note.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        noteService.update("abc", dto);
+
+        verify(noteRepository).save(noteCaptor.capture());
+        Note saved = noteCaptor.getValue();
+        assertThat(saved.getId()).isEqualTo("abc");
+        assertThat(saved.getAuthor()).isEqualTo("Maria Silva");
+        assertThat(saved.getTimestamp()).isEqualTo(originalTimestamp);
+    }
+
+    @Test
+    @DisplayName("Não deveria salvar quando a note não existe")
+    void update_shouldThrowWhenNoteNotFound() {
+        UpdateNoteDTO dto = new UpdateNoteDTO("https://site-novo.com", "Compressor 02", "pressao", "Nova");
+        when(noteRepository.findById("inexistente")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> noteService.update("inexistente", dto))
+                .isInstanceOf(NoteNotFoundException.class);
+
+        verify(noteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deveria remover a note existente")
+    void delete_shouldRemoveExistingNote() {
+        Note existing = buildNote("abc");
+        when(noteRepository.findById("abc")).thenReturn(Optional.of(existing));
+
+        noteService.delete("abc");
+
+        verify(noteRepository).delete(existing);
+    }
+
+    @Test
+    @DisplayName("Não deveria remover quando a note não existe")
+    void delete_shouldThrowWhenNoteNotFound() {
+        when(noteRepository.findById("inexistente")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> noteService.delete("inexistente"))
+                .isInstanceOf(NoteNotFoundException.class);
+
+        verify(noteRepository, never()).delete(any());
     }
 }
