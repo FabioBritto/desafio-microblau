@@ -9,7 +9,8 @@ import org.springframework.data.domain.Pageable;
 public interface INoteService {
 
 
-    Page<NoteDTO> findAll(Pageable pageable);
+    Page<NoteDTO> findAll(Pageable pageable, String site, String equipment, String startDate, String endDate);
     NoteDTO create(CreateNoteDTO createNoteDTO);
     NoteDTO update(String noteId, UpdateNoteDTO updateNoteDTO);
+    void delete(String noteId);
 }

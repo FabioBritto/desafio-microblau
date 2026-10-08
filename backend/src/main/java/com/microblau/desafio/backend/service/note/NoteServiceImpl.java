@@ -5,11 +5,15 @@ import com.microblau.desafio.backend.controller.note.dto.NoteDTO;
 import com.microblau.desafio.backend.controller.note.dto.UpdateNoteDTO;
 import com.microblau.desafio.backend.model.note.Note;
 import com.microblau.desafio.backend.repository.NoteRepository;
+import com.microblau.desafio.backend.util.exceptions.InvalidDateException;
 import com.microblau.desafio.backend.util.exceptions.NoteNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.UUID;
 
 @Service
@@ -22,8 +26,17 @@ public class NoteServiceImpl implements INoteService {
     }
 
     @Override
-    public Page<NoteDTO> findAll(Pageable pageable) {
-        return null;
+    public Page<NoteDTO> findAll(Pageable pageable, String site, String equipment, String startDate, String endDate){
+        Timestamp start = stringDateToTimestamp(startDate);
+        Timestamp end = stringDateToTimestamp(endDate);
+
+        if(start != null && end != null) {
+            if(start.after(end)) throw new InvalidDateException("A data informada não é válida");
+        }
+
+        return noteRepository.findAll(blankStringToNull(site), blankStringToNull(equipment), startDate, endDate, pageable).map(NoteDTO::fromEntity);
+
+
     }
 
     @Override
@@ -45,5 +58,27 @@ public class NoteServiceImpl implements INoteService {
 
         Note updatedNote = noteRepository.save(existingNote);
         return NoteDTO.fromEntity(updatedNote);
+    }
+
+    @Override
+    public void delete(String noteId) {
+        Note existingNote = noteRepository.findById(noteId).orElseThrow(NoteNotFoundException::new);
+        noteRepository.delete(existingNote);
+    }
+
+
+    private Timestamp stringDateToTimestamp(String date) {
+        if(date == null || date.isBlank()) return null;
+
+        try {
+            return Timestamp.from(Instant.parse(date));
+        } catch (DateTimeParseException ex) {
+            throw new InvalidDateException("A data informada é inválida");
+        }
+    }
+
+    private String blankStringToNull(String field) {
+        if(field.isBlank()) return null;
+        return field;
     }
 }
