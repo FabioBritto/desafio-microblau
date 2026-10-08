@@ -1,22 +1,20 @@
 package com.microblau.desafio.backend.config;
 
 import com.microblau.desafio.backend.model.note.Note;
-import com.microblau.desafio.backend.model.note.enums.Equipment;
 import com.microblau.desafio.backend.repository.NoteRepository;
+import com.microblau.desafio.backend.service.note.INoteService;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
-import jakarta.annotation.PostConstruct;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,22 +25,17 @@ public class Seed implements ApplicationRunner {
 
     private static final String SEED_PATH = "db/seed/notes.csv";
 
-    private final NoteRepository noteRepository;
+    private final INoteService noteService;
 
-    public Seed(NoteRepository noteRepository) {
-        this.noteRepository = noteRepository;
+    public Seed(INoteService noteService) {
+        this.noteService = noteService;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        if(noteRepository.count() > 0) {
-            System.out.println("JÁ TEM DADOS");
-            return;
-        }
+        if(noteService.countNotes() > 0) return;
 
         List<Note> notes = new ArrayList<>();
-
-        System.out.println("CHEGUEI AQUI");
 
         try (Reader reader = new InputStreamReader(
                 new ClassPathResource(SEED_PATH).getInputStream(), StandardCharsets.UTF_8);
@@ -52,12 +45,9 @@ public class Seed implements ApplicationRunner {
                 notes.add(fromCsvToEntity(line));
             }
         } catch (IOException | CsvValidationException ex) {
-            //logar
-            ex.printStackTrace();
+
         }
-
-        noteRepository.saveAll(notes);
-
+        noteService.createNotesWithList(notes);
     }
 
     private Note fromCsvToEntity(String[] line) {

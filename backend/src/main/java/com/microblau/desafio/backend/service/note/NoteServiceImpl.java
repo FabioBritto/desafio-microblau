@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,9 +35,12 @@ public class NoteServiceImpl implements INoteService {
             if(start.after(end)) throw new InvalidDateException("A data informada não é válida");
         }
 
-        return noteRepository.findAll(blankStringToNull(site), blankStringToNull(equipment), startDate, endDate, pageable).map(NoteDTO::fromEntity);
+        return noteRepository.findAll(blankStringToNull(site), blankStringToNull(equipment), start, end, pageable).map(NoteDTO::fromEntity);
+    }
 
-
+    @Override
+    public Long countNotes() {
+        return noteRepository.count();
     }
 
     @Override
@@ -46,6 +50,11 @@ public class NoteServiceImpl implements INoteService {
 
         Note created = noteRepository.save(note);
         return NoteDTO.fromEntity(created);
+    }
+
+    @Override
+    public void createNotesWithList(List<Note> notes) {
+        noteRepository.saveAll(notes);
     }
 
     @Override
@@ -78,7 +87,7 @@ public class NoteServiceImpl implements INoteService {
     }
 
     private String blankStringToNull(String field) {
-        if(field.isBlank()) return null;
+        if(field == null || field.isBlank()) return null;
         return field;
     }
 }
