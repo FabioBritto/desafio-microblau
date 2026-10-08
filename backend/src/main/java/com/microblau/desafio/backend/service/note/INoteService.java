@@ -1,4 +1,4 @@
-package com.microblau.desafio.backend.service;
+package com.microblau.desafio.backend.service.note;
 
 import com.microblau.desafio.backend.controller.note.dto.CreateNoteDTO;
 import com.microblau.desafio.backend.controller.note.dto.NoteDTO;
@@ -11,5 +11,5 @@ public interface INoteService {
 
     Page<NoteDTO> findAll(Pageable pageable);
     NoteDTO create(CreateNoteDTO createNoteDTO);
-    NoteDTO update(UpdateNoteDTO updateNoteDTO);
+    NoteDTO update(String noteId, UpdateNoteDTO updateNoteDTO);
 }
