@@ -1,10 +1,12 @@
 package com.microblau.desafio.backend.controller.note.dto;
 
+import com.microblau.desafio.backend.model.note.Note;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 public record UpdateNoteDTO(
+
         @NotBlank(message = "O endereço do site é obrigatório")
         @Size(max = 255, min = 10, message = "O endereço do site precisa ter ao menos 5 caracteres")
         String site,
@@ -20,6 +22,5 @@ public record UpdateNoteDTO(
         @NotEmpty(message = "A mensagem é obrigatória")
         String message
 ) {
-
 
 }

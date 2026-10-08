@@ -9,11 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NoteService implements INoteService {
+public class NoteServiceImpl implements INoteService {
 
     private final NoteRepository noteRepository;
 
-    public NoteService(NoteRepository noteRepository) {
+    public NoteServiceImpl(NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
     }
 
