@@ -1,4 +1,4 @@
-package com.microblau.desafio.backend.util.exceptions.seed;
+package com.microblau.desafio.backend.util.exceptions;
 
 public class SeedException extends RuntimeException {
     public SeedException(String message) {
