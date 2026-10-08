@@ -1,11 +1,10 @@
 package com.microblau.desafio.backend.model.note;
 
-import com.microblau.desafio.backend.model.note.enums.Equipment;
-import com.microblau.desafio.backend.model.note.enums.Variable;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Table(name = "notes")
@@ -18,22 +17,28 @@ public class Note {
     @Column(length = 255, nullable = false)
     private String site;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Equipment equipment;
+    @Column(length =255, nullable = false)
+    private String equipment;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Variable variable;
+    @Column(length =255, nullable = false)
+    private String variable;
 
     @CreationTimestamp
     private Timestamp timestamp;
 
-    @Column(nullable = false)
+    @Column(length =255, nullable = false)
     private String author;
 
     @Column(nullable = false, columnDefinition = "text")
     private String message;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getSite() {
         return site;
@@ -43,20 +48,28 @@ public class Note {
         this.site = site;
     }
 
-    public Equipment getEquipment() {
+    public String getEquipment() {
         return equipment;
     }
 
-    public void setEquipment(Equipment equipment) {
+    public void setEquipment(String equipment) {
         this.equipment = equipment;
     }
 
-    public Variable getVariable() {
+    public String getVariable() {
         return variable;
     }
 
-    public void setVariable(Variable variable) {
+    public void setVariable(String variable) {
         this.variable = variable;
+    }
+
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getAuthor() {
@@ -73,5 +86,30 @@ public class Note {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Note note = (Note) o;
+        return Objects.equals(id, note.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Note{" +
+                "id='" + id + '\'' +
+                ", site='" + site + '\'' +
+                ", equipment='" + equipment + '\'' +
+                ", variable='" + variable + '\'' +
+                ", timestamp=" + timestamp +
+                ", author='" + author + '\'' +
+                ", message='" + message + '\'' +
+                '}';
     }
 }
