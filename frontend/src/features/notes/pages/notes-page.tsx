@@ -3,12 +3,12 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/shared/components/button'
 import { Pagination } from '@/shared/components/pagination'
 import { Select, type SelectOption } from '@/shared/components/select'
-import { DeleteNoteModal } from './components/delete-note-modal'
-import { NoteFormModal } from './components/note-form-modal'
-import { NotesTable } from './components/notes-table'
-import { PeriodFilterModal } from './components/period-filter-modal'
-import { useCreateNote, useDeleteNote, useNotesList, useUpdateNote } from './queries'
-import type { Note, NotesFilters } from './schmeas'
+import { DeleteNoteModal } from '../components/delete-note-modal'
+import { NoteFormModal } from '../components/note-form-modal'
+import { NotesTable } from '../components/notes-table'
+import { PeriodFilterModal } from '../components/period-filter-modal'
+import { useCreateNote, useDeleteNote, useNotesList, useUpdateNote } from '../queries'
+import type { Note, NotesFilters } from '../schmeas'
 
 const optionFilters: NotesFilters = { page: 1, size: 100 }
 
