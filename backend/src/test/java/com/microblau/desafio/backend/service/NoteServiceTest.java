@@ -69,7 +69,7 @@ public class NoteServiceTest {
         payloadRequest = new CreateNoteDTO(
                 "Exemplo de site",
                 "Exemplo de Equipamento",
-                "Exemplo de variável",
+                "Exemplo de monitoração",
                 "Exemplo de Autor",
                 "Exemplo de mensagem"
         );

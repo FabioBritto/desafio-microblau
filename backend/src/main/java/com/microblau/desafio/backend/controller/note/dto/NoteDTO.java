@@ -16,7 +16,7 @@ public record NoteDTO(
         @Schema(description = "Equipamento relacionado à nota", example = "Equipamento exemplo")
         String equipment,
 
-        @Schema(description = "Variável relacionada à nota", example = "Variável exemplo")
+        @Schema(description = "Monitoração relacionada à nota", example = "Monitoração exemplo")
         String variable,
 
         @Schema(description = "Data e hora de criação da nota", example = "2026-01-01T00:00:00Z")

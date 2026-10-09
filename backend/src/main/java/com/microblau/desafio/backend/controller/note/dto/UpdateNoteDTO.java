@@ -17,9 +17,9 @@ public record UpdateNoteDTO(
         @Size(max = 255, min = 5, message = "O nome do equipamento precisa ter ao menos 5 caracteres")
         String equipment,
 
-        @Schema(description = "Variável relacionada à nota", example = "Variável exemplo")
-        @NotBlank(message = "O nome da variável é obrigatória")
-        @Size(max = 255, min = 3, message = "O nome da variável precisa ter ao menos 3 caracteres")
+        @Schema(description = "Monitoração relacionada à nota", example = "Monitoração exemplo")
+        @NotBlank(message = "O nome da monitoração é obrigatória")
+        @Size(max = 255, min = 3, message = "O nome da monitoração precisa ter ao menos 3 caracteres")
         String variable,
 
         @Schema(description = "Mensagem da nota", example = "Lorem ipsum dolor sit amet consectetur adipiscing elit...")
