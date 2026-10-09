@@ -32,10 +32,10 @@ const optionItems: NavEntry[] = [
 export function Sidebar() {
     return (
         <aside className="flex h-screen w-64 shrink-0 flex-col bg-gray-800 px-4 py-6">
-            <img src={logo} alt="" width={50} height={39} />
+            <img src={logo} alt="" width={50} height={39} className="self-center" />
             <nav className="mt-8 flex flex-col gap-6">
                 <section className="flex flex-col gap-2">
-                    <p className="px-3 text-body-sm text-white">Menu Principal</p>
+                    <p className="text-h5 text-body-sm text-white">Menu Principal</p>
                     <ul className="flex flex-col gap-1">
                         {mainItems.map((item) => (
                             <li key={item.label}>
@@ -51,7 +51,7 @@ export function Sidebar() {
                 </section>
                 <hr className="border-gray-400" />
                 <section className="flex flex-col gap-2">
-                    <p className="px-3 text-body-sm text-white">Opções</p>
+                    <p className="text-h5 text-body-sm text-white">Opções</p>
                     <ul className="flex flex-col gap-1">
                         {optionItems.map((item) => (
                             <li key={item.label}>
