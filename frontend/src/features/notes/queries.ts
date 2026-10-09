@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { notesApi } from "./api";
 import type { CreateNoteDTO, NotesFilters, UpdateNoteDTO } from "./schmeas";
 
@@ -30,6 +31,7 @@ export function useCreateNote() {
         mutationFn: (note: CreateNoteDTO) => notesApi.create(note),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: notesKeys.all });
+            toast.success('Nota criada com sucesso');
         },
     })
 }

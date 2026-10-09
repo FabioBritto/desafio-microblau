@@ -98,7 +98,7 @@ function ChevronButton({
             aria-label={label}
             disabled={disabled}
             onClick={onClick}
-            className="inline-flex size-8 items-center justify-center rounded text-primary-300 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex size-8 items-center justify-center rounded text-primary-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
             {children}
         </button>

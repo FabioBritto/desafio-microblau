@@ -1,4 +1,4 @@
-import { NotesPage } from './features/notes/NotesPage'
+import { NotesPage } from './features/notes/notes-page'
 import { Sidebar } from './shared/components/sidebar'
 
 export default function App() {

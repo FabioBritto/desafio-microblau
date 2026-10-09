@@ -1,10 +1,11 @@
 import { Funnel } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '@/shared/components/button'
-import { Pagination } from '@/shared/components/Pagination'
-import { Select, type SelectOption } from '@/shared/components/Select'
-import { NotesTable } from './components/NotesTable'
-import { useNotesList } from './queries'
+import { Pagination } from '@/shared/components/pagination'
+import { Select, type SelectOption } from '@/shared/components/select'
+import { NoteFormModal } from './components/note-form-modal'
+import { NotesTable } from './components/notes-table'
+import { useCreateNote, useNotesList } from './queries'
 import type { NotesFilters } from './schmeas'
 
 const optionFilters: NotesFilters = { page: 1, size: 100 }
@@ -17,8 +18,10 @@ function toSelectOptions(values: Array<string | undefined>, selected?: string): 
 
 export function NotesPage() {
     const [filters, setFilters] = useState<NotesFilters>({ page: 1, size: 5 })
+    const [createOpen, setCreateOpen] = useState(false)
     const { data, isLoading, isPlaceholderData, isError } = useNotesList(filters)
     const { data: optionSource } = useNotesList(optionFilters)
+    const createNote = useCreateNote()
 
     const siteOptions = useMemo(
         () => toSelectOptions(optionSource?.content.map((note) => note.site) ?? [], filters.site),
@@ -28,10 +31,23 @@ export function NotesPage() {
         () => toSelectOptions(optionSource?.content.map((note) => note.equipment) ?? [], filters.equipment),
         [optionSource?.content, filters.equipment],
     )
+    const formEquipmentOptions = useMemo(
+        () => toSelectOptions(optionSource?.content.map((note) => note.equipment) ?? []),
+        [optionSource?.content],
+    )
+    const variableOptions = useMemo(
+        () => toSelectOptions(optionSource?.content.map((note) => note.variable) ?? []),
+        [optionSource?.content],
+    )
 
     return (
         <div className="px-6 py-6">
-            <h1 className="mb-5 text-h5 text-gray-800">Notas</h1>
+            <div className="mb-5 flex items-center justify-between gap-4">
+                <h1 className="text-h5 text-gray-800">Notas</h1>
+                <Button size="sm" variant="primary" onClick={() => setCreateOpen(true)}>
+                    Nova nota
+                </Button>
+            </div>
             <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex min-w-0 flex-1 gap-3">
                     <Select
@@ -75,6 +91,17 @@ export function NotesPage() {
                 page={filters.page ?? 1}
                 totalPages={data?.totalPages ?? 0}
                 onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
+            />
+            <NoteFormModal
+                open={createOpen}
+                onClose={() => setCreateOpen(false)}
+                equipmentOptions={formEquipmentOptions}
+                variableOptions={variableOptions}
+                pending={createNote.isPending}
+                onSubmit={async (values) => {
+                    await createNote.mutateAsync(values)
+                    setCreateOpen(false)
+                }}
             />
         </div>
     )

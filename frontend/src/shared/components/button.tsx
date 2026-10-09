@@ -1,12 +1,13 @@
 import type { ComponentProps } from 'react'
 
 interface ButtonProps extends ComponentProps<'button'> {
-    variant?: 'primary'
+    variant?: 'primary' | 'secondary'
     size?: 'sm'
 }
 
 const variants = {
     primary: 'bg-primary-500 text-white',
+    secondary: 'border border-gray-100 bg-white text-gray-800',
 }
 
 const sizes = {
