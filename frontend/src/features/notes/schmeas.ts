@@ -41,3 +41,14 @@ export const paginatedNoteSchema = z.object({
 
 export type PaginatedNote = z.infer<typeof paginatedNoteSchema>;
 
+export const notesFilters = z.object({
+    site: z.string().optional(),
+    equipment: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    page: z.number().optional(),
+    limit: z.number().optional(),
+});
+
+export type NotesFilters = z.infer<typeof notesFilters>;
+
