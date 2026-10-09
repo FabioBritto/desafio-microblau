@@ -6,6 +6,7 @@ import { Select, type SelectOption } from '@/shared/components/select'
 import { DeleteNoteModal } from './components/delete-note-modal'
 import { NoteFormModal } from './components/note-form-modal'
 import { NotesTable } from './components/notes-table'
+import { PeriodFilterModal } from './components/period-filter-modal'
 import { useCreateNote, useDeleteNote, useNotesList, useUpdateNote } from './queries'
 import type { Note, NotesFilters } from './schmeas'
 
@@ -22,6 +23,7 @@ export function NotesPage() {
     const [createOpen, setCreateOpen] = useState(false)
     const [editingNote, setEditingNote] = useState<Note | null>(null)
     const [deletingNote, setDeletingNote] = useState<Note | null>(null)
+    const [periodOpen, setPeriodOpen] = useState(false)
     const { data, isLoading, isPlaceholderData, isError } = useNotesList(filters)
     const { data: optionSource } = useNotesList(optionFilters)
     const createNote = useCreateNote()
@@ -82,7 +84,7 @@ export function NotesPage() {
                         }}
                     />
                 </div>
-                <Button size="sm" variant="primary" onClick={() => {}}>
+                <Button size="sm" variant="primary" onClick={() => setPeriodOpen(true)}>
                     <Funnel size={14} /> Filtrar por período
                 </Button>
             </div>
@@ -137,6 +139,29 @@ export function NotesPage() {
                     if (!editingNote) return
                     await updateNote.mutateAsync({ id: editingNote.id, note: values })
                     setEditingNote(null)
+                }}
+            />
+            <PeriodFilterModal
+                open={periodOpen}
+                onClose={() => setPeriodOpen(false)}
+                startDate={filters.startDate}
+                endDate={filters.endDate}
+                onApply={(values) => {
+                    setFilters((prev) => ({
+                        ...prev,
+                        startDate: values.startDate,
+                        endDate: values.endDate,
+                        page: 1,
+                    }))
+                }}
+                onClear={() => {
+                    setFilters((prev) => ({
+                        ...prev,
+                        startDate: undefined,
+                        endDate: undefined,
+                        page: 1,
+                    }))
+                    setPeriodOpen(false)
                 }}
             />
             <DeleteNoteModal
