@@ -26,6 +26,7 @@ import java.time.Instant;
 @RestController
 @RequestMapping("/api/v1/notes")
 @Tag(name = "Notas")
+@CrossOrigin(origins = "http://localhost:5173")
 public class NoteController {
 
     private final INoteService noteService;
