@@ -46,7 +46,7 @@ collection:
         {
         	"site": "www.site-generico.com",
         	"equipment": "Exemplo de site",
-        	"variable": "Variável Genérica",
+        	"variable": "Monitoração Genérica",
         	"author": "Fabio Britto",
         	"message": "Texto do Fabio da Silva Britto"
         }
@@ -79,10 +79,10 @@ collection:
       mimeType: application/json
       text: |-
         {
-        	"site": "www.arrangeme.com",
-        	"equipment": "Violino didático",
-        	"variable": "VARIÁVEL DO FABIO BRITTO",
-        	"message": "Fabio da Silva Britto"
+        	"site": "www.site-exemplo.com",
+        	"equipment": "Equipamento exemplo",
+        	"variable": "Monitoração do Fabio Britto",
+        	"message": "Mensagem do Fabio Britto"
         }
     headers:
       - name: Content-Type

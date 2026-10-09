@@ -23,7 +23,7 @@ public class Note {
     @Column(length =255, nullable = false)
     private String variable;
 
-    @CreationTimestamp
+    @Column(updatable = false)
     private Timestamp timestamp;
 
     @Column(length =255, nullable = false)
@@ -31,6 +31,13 @@ public class Note {
 
     @Column(nullable = false, columnDefinition = "text")
     private String message;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.timestamp == null) {
+            this.timestamp = new Timestamp(System.currentTimeMillis());
+        }
+    }
 
     public String getId() {
         return id;
