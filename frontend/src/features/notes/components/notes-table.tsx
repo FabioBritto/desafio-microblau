@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+import { SquarePen, Trash } from 'lucide-react'
 import { flexRender } from '@tanstack/react-table'
 import { getCoreRowModel, useLegacyTable, type LegacyColumnDef } from '@tanstack/react-table/legacy'
 import type { Note } from '../schmeas'
@@ -7,28 +9,67 @@ interface NotesTableProps {
     isLoading?: boolean
     isError?: boolean
     totalPages?: number
+    onEdit: (note: Note) => void
+    onDelete: (note: Note) => void
 }
 
-const columns: LegacyColumnDef<Note>[] = [
-    { accessorKey: 'site', header: 'Site' },
-    { accessorKey: 'equipment', header: 'Equipamento' },
-    { accessorKey: 'variable', header: 'Monitoração' },
-    {
-        accessorKey: 'timestamp',
-        header: 'Data',
-        cell: ({ getValue }) => formatNoteTimestamp(String(getValue() ?? '')),
-    },
-    { accessorKey: 'author', header: 'Autor' },
-    {
-        accessorKey: 'message',
-        header: 'Mensagem',
-        cell: ({ getValue }) => (
-            <span className="break-words whitespace-normal">{String(getValue() ?? '')}</span>
-        ),
-    },
-]
+function createColumns(
+    onEdit: (note: Note) => void,
+    onDelete: (note: Note) => void,
+): LegacyColumnDef<Note>[] {
+    return [
+        { accessorKey: 'site', header: 'Site' },
+        { accessorKey: 'equipment', header: 'Equipamento' },
+        { accessorKey: 'variable', header: 'Monitoração' },
+        {
+            accessorKey: 'timestamp',
+            header: 'Data',
+            cell: ({ getValue }) => formatNoteTimestamp(String(getValue() ?? '')),
+        },
+        { accessorKey: 'author', header: 'Autor' },
+        {
+            accessorKey: 'message',
+            header: 'Mensagem',
+            cell: ({ getValue }) => (
+                <span className="break-words whitespace-normal">{String(getValue() ?? '')}</span>
+            ),
+        },
+        {
+            id: 'actions',
+            header: '',
+            cell: ({ row }) => (
+                <div className="flex items-center justify-end gap-1">
+                    <button
+                        type="button"
+                        aria-label="Editar nota"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded text-gray-800"
+                        onClick={() => onEdit(row.original)}
+                    >
+                        <SquarePen size={16} />
+                    </button>
+                    <button
+                        type="button"
+                        aria-label="Excluir nota"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded text-gray-800"
+                        onClick={() => onDelete(row.original)}
+                    >
+                        <Trash size={16} />
+                    </button>
+                </div>
+            ),
+        },
+    ]
+}
 
-export function NotesTable({ notes, isLoading = false, isError = false, totalPages }: NotesTableProps) {
+export function NotesTable({
+    notes,
+    isLoading = false,
+    isError = false,
+    totalPages,
+    onEdit,
+    onDelete,
+}: NotesTableProps) {
+    const columns = useMemo(() => createColumns(onEdit, onDelete), [onEdit, onDelete])
     const table = useLegacyTable({
         data: notes,
         columns,
@@ -49,7 +90,9 @@ export function NotesTable({ notes, isLoading = false, isError = false, totalPag
                                 <th
                                     key={header.id}
                                     scope="col"
-                                    className="h-14 px-4 text-left align-middle text-body-md font-semibold text-gray-800"
+                                    className={`h-14 px-4 text-left align-middle text-body-md font-semibold text-gray-800 ${
+                                        header.column.id === 'actions' ? 'w-24' : ''
+                                    }`}
                                 >
                                     {header.isPlaceholder
                                         ? null
@@ -78,7 +121,9 @@ export function NotesTable({ notes, isLoading = false, isError = false, totalPag
                                 {row.getVisibleCells().map((cell) => (
                                     <td
                                         key={cell.id}
-                                        className="px-4 py-4 align-middle text-body-md break-words text-gray-800"
+                                        className={`px-4 py-4 align-middle text-body-md break-words text-gray-800 ${
+                                            cell.column.id === 'actions' ? 'w-24' : ''
+                                        }`}
                                     >
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>

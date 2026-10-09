@@ -2,18 +2,34 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { Button } from '@/shared/components/button'
 import { Modal } from '@/shared/components/modal'
 import { Select, type SelectOption } from '@/shared/components/select'
-import { createNoteSchema, type CreateNoteDTO } from '../schmeas'
+import {
+    createNoteSchema,
+    updateNoteSchema,
+    type CreateNoteDTO,
+    type UpdateNoteDTO,
+} from '../schmeas'
 
-interface NoteFormModalProps {
+interface NoteFormBaseProps {
     open: boolean
     onClose: () => void
-    onSubmit: (values: CreateNoteDTO) => void | Promise<void>
-    defaultValues?: Partial<CreateNoteDTO>
-    submitLabel?: string
     equipmentOptions: SelectOption[]
     variableOptions: SelectOption[]
     pending?: boolean
 }
+
+interface NoteFormCreateProps extends NoteFormBaseProps {
+    mode?: 'create'
+    defaultValues?: Partial<CreateNoteDTO>
+    onSubmit: (values: CreateNoteDTO) => void | Promise<void>
+}
+
+interface NoteFormUpdateProps extends NoteFormBaseProps {
+    mode: 'update'
+    defaultValues?: Partial<UpdateNoteDTO>
+    onSubmit: (values: UpdateNoteDTO) => void | Promise<void>
+}
+
+type NoteFormModalProps = NoteFormCreateProps | NoteFormUpdateProps
 
 const emptyValues: CreateNoteDTO = {
     site: '',
@@ -29,8 +45,10 @@ const fieldClassName =
     'w-full rounded-md border bg-white px-4 text-body-sm text-gray-800 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500'
 
 export function NoteFormModal({ open, onClose, ...formProps }: NoteFormModalProps) {
+    const mode = formProps.mode ?? 'create'
+
     return (
-        <Modal open={open} title="Nova nota" onClose={onClose}>
+        <Modal open={open} title={mode === 'update' ? 'Editar nota' : 'Nova nota'} onClose={onClose}>
             {open ? <NoteForm onClose={onClose} {...formProps} /> : null}
         </Modal>
     )
@@ -38,25 +56,35 @@ export function NoteFormModal({ open, onClose, ...formProps }: NoteFormModalProp
 
 function NoteForm({
     onClose,
-    onSubmit,
     defaultValues,
-    submitLabel = 'Criar Nota',
     equipmentOptions,
     variableOptions,
     pending = false,
+    ...modeProps
 }: Omit<NoteFormModalProps, 'open'>) {
+    const mode = modeProps.mode ?? 'create'
     const [values, setValues] = useState<CreateNoteDTO>({ ...emptyValues, ...defaultValues })
     const [errors, setErrors] = useState<FieldErrors>({})
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
+        if (modeProps.mode === 'update') {
+            const parsed = updateNoteSchema.safeParse(values)
+            if (!parsed.success) {
+                setErrors(toFieldErrors(parsed.error.issues))
+                return
+            }
+            setErrors({})
+            await modeProps.onSubmit(parsed.data)
+            return
+        }
         const parsed = createNoteSchema.safeParse(values)
         if (!parsed.success) {
             setErrors(toFieldErrors(parsed.error.issues))
             return
         }
         setErrors({})
-        await onSubmit(parsed.data)
+        await modeProps.onSubmit(parsed.data)
     }
 
     return (
@@ -94,15 +122,19 @@ function NoteForm({
                         }
                     />
                 </Field>
-                <Field label="Autor" error={errors.author}>
-                    <input
-                        aria-label="Autor"
-                        value={values.author}
-                        aria-invalid={errors.author ? true : undefined}
-                        onChange={(event) => setValues((prev) => ({ ...prev, author: event.target.value }))}
-                        className={`h-9 ${fieldClassName} ${errors.author ? 'border-danger-main' : 'border-gray-100'}`}
-                    />
-                </Field>
+                {mode === 'create' && (
+                    <Field label="Autor" error={errors.author}>
+                        <input
+                            aria-label="Autor"
+                            value={values.author}
+                            aria-invalid={errors.author ? true : undefined}
+                            onChange={(event) =>
+                                setValues((prev) => ({ ...prev, author: event.target.value }))
+                            }
+                            className={`h-9 ${fieldClassName} ${errors.author ? 'border-danger-main' : 'border-gray-100'}`}
+                        />
+                    </Field>
+                )}
                 <Field label="Mensagem" error={errors.message}>
                     <textarea
                         aria-label="Mensagem"
@@ -121,7 +153,7 @@ function NoteForm({
                         Cancelar
                     </Button>
                     <Button type="submit" variant="primary" disabled={pending}>
-                        {submitLabel}
+                        {mode === 'update' ? 'Salvar' : 'Criar Nota'}
                     </Button>
                 </div>
             </form>

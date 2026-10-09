@@ -3,10 +3,11 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/shared/components/button'
 import { Pagination } from '@/shared/components/pagination'
 import { Select, type SelectOption } from '@/shared/components/select'
+import { DeleteNoteModal } from './components/delete-note-modal'
 import { NoteFormModal } from './components/note-form-modal'
 import { NotesTable } from './components/notes-table'
-import { useCreateNote, useNotesList } from './queries'
-import type { NotesFilters } from './schmeas'
+import { useCreateNote, useDeleteNote, useNotesList, useUpdateNote } from './queries'
+import type { Note, NotesFilters } from './schmeas'
 
 const optionFilters: NotesFilters = { page: 1, size: 100 }
 
@@ -19,9 +20,13 @@ function toSelectOptions(values: Array<string | undefined>, selected?: string): 
 export function NotesPage() {
     const [filters, setFilters] = useState<NotesFilters>({ page: 1, size: 5 })
     const [createOpen, setCreateOpen] = useState(false)
+    const [editingNote, setEditingNote] = useState<Note | null>(null)
+    const [deletingNote, setDeletingNote] = useState<Note | null>(null)
     const { data, isLoading, isPlaceholderData, isError } = useNotesList(filters)
     const { data: optionSource } = useNotesList(optionFilters)
     const createNote = useCreateNote()
+    const updateNote = useUpdateNote()
+    const deleteNote = useDeleteNote()
 
     const siteOptions = useMemo(
         () => toSelectOptions(optionSource?.content.map((note) => note.site) ?? [], filters.site),
@@ -86,6 +91,8 @@ export function NotesPage() {
                 isLoading={isLoading || isPlaceholderData}
                 isError={isError}
                 totalPages={data?.totalPages}
+                onEdit={setEditingNote}
+                onDelete={setDeletingNote}
             />
             <Pagination
                 page={filters.page ?? 1}
@@ -101,6 +108,45 @@ export function NotesPage() {
                 onSubmit={async (values) => {
                     await createNote.mutateAsync(values)
                     setCreateOpen(false)
+                }}
+            />
+            <NoteFormModal
+                mode="update"
+                open={editingNote != null}
+                onClose={() => setEditingNote(null)}
+                defaultValues={
+                    editingNote
+                        ? {
+                              site: editingNote.site,
+                              equipment: editingNote.equipment,
+                              variable: editingNote.variable,
+                              message: editingNote.message,
+                          }
+                        : undefined
+                }
+                equipmentOptions={toSelectOptions(
+                    optionSource?.content.map((note) => note.equipment) ?? [],
+                    editingNote?.equipment,
+                )}
+                variableOptions={toSelectOptions(
+                    optionSource?.content.map((note) => note.variable) ?? [],
+                    editingNote?.variable,
+                )}
+                pending={updateNote.isPending}
+                onSubmit={async (values) => {
+                    if (!editingNote) return
+                    await updateNote.mutateAsync({ id: editingNote.id, note: values })
+                    setEditingNote(null)
+                }}
+            />
+            <DeleteNoteModal
+                open={deletingNote != null}
+                onClose={() => setDeletingNote(null)}
+                pending={deleteNote.isPending}
+                onConfirm={async () => {
+                    if (!deletingNote) return
+                    await deleteNote.mutateAsync(deletingNote.id)
+                    setDeletingNote(null)
                 }}
             />
         </div>

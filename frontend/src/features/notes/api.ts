@@ -20,5 +20,5 @@ export const notesApi = {
         api.put<Note>(`notes/${id}`, note, signal),
 
     delete: (id: string, signal?: AbortSignal) =>
-        api.delete<Note>(`notes/${id}`, signal),
+        api.delete<void>(`notes/${id}`, signal),
 }

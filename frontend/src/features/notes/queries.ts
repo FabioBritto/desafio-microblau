@@ -43,6 +43,7 @@ export function useUpdateNote() {
         mutationFn: ({ id, note }: { id: string, note: UpdateNoteDTO }) => notesApi.update(id, note),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: notesKeys.all });
+            toast.success('Nota atualizada com sucesso');
         },
     })
 }
@@ -54,6 +55,7 @@ export function useDeleteNote() {
         mutationFn: (id: string) => notesApi.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: notesKeys.all });
+            toast.success('Nota excluída com sucesso');
         },
     })
 }
