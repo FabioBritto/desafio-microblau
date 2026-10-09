@@ -1,0 +1,229 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: microblau-desafio
+meta:
+  id: wrk_9128455af02f45198219ab4f699e9c62
+  created: 1791435089074
+  modified: 1791435089074
+  description: ""
+collection:
+  - url: localhost:8080/api/v1/notes?site=Franc&equipment=Mult&startDate=2026-10-02T00:00:00Z&endDate=2026-11-08T00:00:00Z
+    name: Buscar todas as Notas
+    meta:
+      id: req_7a00f36118ec41f092ad87eacb04f68e
+      created: 1791435101580
+      modified: 1791442723386
+      isPrivate: false
+      description: ""
+      sortKey: -1791435101580
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/api/v1/notes
+    name: Cadastrar nova Nota
+    meta:
+      id: req_3d5fa9732e5e45b7984532e041419ca2
+      created: 1791435485504
+      modified: 1791442547902
+      isPrivate: false
+      description: ""
+      sortKey: -1791435485504
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"site": "www.site-generico.com",
+        	"equipment": "Exemplo de site",
+        	"variable": "Variável Genérica",
+        	"author": "Fabio Britto",
+        	"message": "Texto do Fabio da Silva Britto"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/api/v1/notes/742d8401-3a03-4472-bff3-c74e342265f7
+    name: Atualizar Nota
+    meta:
+      id: req_4614bf22ad27493f9cf1965e0affc89e
+      created: 1791438767072
+      modified: 1791438853180
+      isPrivate: false
+      description: ""
+      sortKey: -1791438767072
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"site": "www.arrangeme.com",
+        	"equipment": "Violino didático",
+        	"variable": "VARIÁVEL DO FABIO BRITTO",
+        	"message": "Fabio da Silva Britto"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/api/v1/notes/742d8401-3a03-4472-bff3-c74e342265f7
+    name: Remover Nota
+    meta:
+      id: req_d07d5add910c4ed5aa311248246a3770
+      created: 1791438926512
+      modified: 1791438967421
+      isPrivate: false
+      description: ""
+      sortKey: -1791438926512
+    method: DELETE
+    headers:
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/api/v1/notes/742d8401-3a03-4472-bff3-c74e342265f7
+    name: Buscar Nota pelo ID
+    meta:
+      id: req_55667edc28464c6d8d136a63a2c978fb
+      created: 1791439221864
+      modified: 1791439278947
+      isPrivate: false
+      description: ""
+      sortKey: -1791439221864
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/api/v1/notes
+    name: Cadastrar nova Nota com Erro de Validação
+    meta:
+      id: req_885a38ea0b054905ad347928a8333d2b
+      created: 1791442558388
+      modified: 1791442595295
+      isPrivate: false
+      description: ""
+      sortKey: -1791435293542
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"site": "www",
+        	"equipment": "Exem",
+        	"variable": "Va",
+        	"author": "Fab",
+        	"message": ""
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: localhost:8080/api/v1/notes/742d8401-3a03-4472-bff3-c74e342265f7
+    name: Atualizar Nota com Erro de Validação
+    meta:
+      id: req_1ec98b68a78540e29a4747b9c986916c
+      created: 1791442611615
+      modified: 1791442680867
+      isPrivate: false
+      description: ""
+      sortKey: -1791437126288
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"site": "www",
+        	"equipment": "..",
+        	"variable": "VA",
+        	"message": ""
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.2.0
+        description: ""
+        disabled: false
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_ca41549431c42c4142b2953bbfd4caee0a88bc10
+    created: 1791435089079
+    modified: 1791435089079
+environments:
+  name: Base Environment
+  meta:
+    id: env_ca41549431c42c4142b2953bbfd4caee0a88bc10
+    created: 1791435089077
+    modified: 1791435089077
+    isPrivate: false
