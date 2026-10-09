@@ -32,11 +32,11 @@ export const updateNoteSchema = z.object({
 export type UpdateNoteDTO = z.infer<typeof updateNoteSchema>;
 
 export const paginatedNoteSchema = z.object({
-    items: z.array(noteSchema),
-    totalItems: z.number(),
-    currentPage: z.number(),
+    content: z.array(noteSchema),
+    totalElements: z.number(),
     totalPages: z.number(),
-    pageSize: z.number(),
+    number: z.number(),
+    size: z.number(),
 });
 
 export type PaginatedNote = z.infer<typeof paginatedNoteSchema>;
@@ -47,7 +47,7 @@ export const notesFilters = z.object({
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     page: z.number().optional(),
-    limit: z.number().optional(),
+    size: z.number().optional(),
 });
 
 export type NotesFilters = z.infer<typeof notesFilters>;

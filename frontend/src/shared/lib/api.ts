@@ -37,7 +37,11 @@ async function apiRequest<T>(method: string, path: string, options: { body?: unk
         throw new ApiError(response.status, error.message);
     }
 
-    return response.json();
+    if (response.status === 204) return undefined as T;
+
+    const text = await response.text();
+    if (!text) return undefined as T;
+    return JSON.parse(text) as T;
 } 
 
 export const api = {
