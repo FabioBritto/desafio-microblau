@@ -1,11 +1,10 @@
-package com.microblau.desafio.backend;
+package com.microblau.desafio.backend.service;
 
 import com.microblau.desafio.backend.controller.note.dto.CreateNoteDTO;
 import com.microblau.desafio.backend.controller.note.dto.NoteDTO;
 import com.microblau.desafio.backend.controller.note.dto.UpdateNoteDTO;
 import com.microblau.desafio.backend.model.note.Note;
 import com.microblau.desafio.backend.repository.NoteRepository;
-import com.microblau.desafio.backend.service.note.INoteService;
 import com.microblau.desafio.backend.service.note.NoteServiceImpl;
 import com.microblau.desafio.backend.util.exceptions.InvalidDateException;
 import com.microblau.desafio.backend.util.exceptions.NoteNotFoundException;
@@ -50,8 +49,8 @@ public class NoteServiceTest {
 
     private final Pageable pageable = PageRequest.of(0, 10);
 
-    private static final String START = "2024-08-01T00:00:00Z";
-    private static final String END = "2024-08-02T00:00:00Z";
+    private static final Instant START = Instant.parse("2024-08-01T00:00:00Z");
+    private static final Instant END = Instant.parse("2024-08-02T00:00:00Z");
 
     private Note buildNote(String id) {
         Note note = new Note();
@@ -61,7 +60,7 @@ public class NoteServiceTest {
         note.setVariable("temperatura");
         note.setAuthor("Maria Silva");
         note.setMessage("Mensagem original");
-        note.setTimestamp(Timestamp.from(Instant.parse(START)));
+        note.setTimestamp(Timestamp.from(START));
         return note;
     }
 
@@ -171,20 +170,9 @@ public class NoteServiceTest {
         verify(noteRepository).findAll(
                 isNull(),
                 isNull(),
-                eq(Timestamp.from(Instant.parse(START))),
-                eq(Timestamp.from(Instant.parse(END))),
+                eq(Timestamp.from(START)),
+                eq(Timestamp.from(END)),
                 eq(pageable));
-    }
-
-    @Test
-    @DisplayName("Deveria tratar datas em branco como ausentes")
-    void findAll_shouldTreatBlankDatesAsNull() {
-        when(noteRepository.findAll(any(), any(), any(), any(), eq(pageable)))
-                .thenReturn(Page.empty());
-
-        noteService.findAll(pageable, null, null, " ", "");
-
-        verify(noteRepository).findAll(isNull(), isNull(), isNull(), isNull(), eq(pageable));
     }
 
     @Test
@@ -196,7 +184,7 @@ public class NoteServiceTest {
         noteService.findAll(pageable, null, null, START, null);
 
         verify(noteRepository).findAll(
-                isNull(), isNull(), eq(Timestamp.from(Instant.parse(START))), isNull(), eq(pageable));
+                isNull(), isNull(), eq(Timestamp.from(START)), isNull(), eq(pageable));
     }
 
     @Test
@@ -214,18 +202,6 @@ public class NoteServiceTest {
     @DisplayName("Não deveria consultar o repositório quando startDate > endDate")
     void findAll_shouldThrowWhenStartIsAfterEnd() {
         assertThatThrownBy(() -> noteService.findAll(pageable, null, null, END, START))
-                .isInstanceOf(InvalidDateException.class);
-
-        verifyNoInteractions(noteRepository);
-    }
-
-    @Test
-    @DisplayName("Não deveria consultar o repositório quando o formato da data é inválido")
-    void findAll_shouldThrowWhenDateFormatIsInvalid() {
-        assertThatThrownBy(() -> noteService.findAll(pageable, null, null, "01/08/2024", null))
-                .isInstanceOf(InvalidDateException.class);
-
-        assertThatThrownBy(() -> noteService.findAll(pageable, null, null, null, "não-é-data"))
                 .isInstanceOf(InvalidDateException.class);
 
         verifyNoInteractions(noteRepository);
@@ -292,22 +268,21 @@ public class NoteServiceTest {
     @Test
     @DisplayName("Deveria remover a note existente")
     void delete_shouldRemoveExistingNote() {
-        Note existing = buildNote("abc");
-        when(noteRepository.findById("abc")).thenReturn(Optional.of(existing));
+        when(noteRepository.existsById("abc")).thenReturn(true);
 
         noteService.delete("abc");
 
-        verify(noteRepository).delete(existing);
+        verify(noteRepository).deleteById("abc");
     }
 
     @Test
     @DisplayName("Não deveria remover quando a note não existe")
     void delete_shouldThrowWhenNoteNotFound() {
-        when(noteRepository.findById("inexistente")).thenReturn(Optional.empty());
+        when(noteRepository.existsById("abc")).thenReturn(false);
 
-        assertThatThrownBy(() -> noteService.delete("inexistente"))
+        assertThatThrownBy(() -> noteService.delete("abc"))
                 .isInstanceOf(NoteNotFoundException.class);
 
-        verify(noteRepository, never()).delete(any());
+        verify(noteRepository, never()).deleteById(any());
     }
 }

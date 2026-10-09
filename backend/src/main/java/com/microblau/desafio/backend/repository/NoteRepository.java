@@ -15,8 +15,8 @@ public interface NoteRepository extends JpaRepository<Note, String> {
     SELECT n FROM Note n
     WHERE (:site IS NULL OR LOWER(n.site) LIKE LOWER(CONCAT('%', :site, '%')))
     AND (:equipment IS NULL OR LOWER(n.equipment) LIKE LOWER(CONCAT('%', :equipment, '%')))
-    AND (:startDate IS NULL OR n.timestamp = :startDate)
-    AND (:endDate IS NULL OR n.timestamp = :endDate)
+    AND (:startDate IS NULL OR n.timestamp >= :startDate)
+    AND (:endDate IS NULL OR n.timestamp <= :endDate)
     """)
     Page<Note> findAll(@Param("site") String site,
                        @Param("equipment") String equipment,

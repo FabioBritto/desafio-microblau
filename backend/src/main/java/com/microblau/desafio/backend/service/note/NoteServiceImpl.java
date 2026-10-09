@@ -10,6 +10,7 @@ import com.microblau.desafio.backend.util.exceptions.NoteNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -27,15 +28,20 @@ public class NoteServiceImpl implements INoteService {
     }
 
     @Override
-    public Page<NoteDTO> findAll(Pageable pageable, String site, String equipment, String startDate, String endDate){
-        Timestamp start = stringDateToTimestamp(startDate);
-        Timestamp end = stringDateToTimestamp(endDate);
+    public Page<NoteDTO> findAll(Pageable pageable, String site, String equipment, Instant startDate, Instant endDate){
 
-        if(start != null && end != null) {
-            if(start.after(end)) throw new InvalidDateException("A data informada não é válida");
+        if(startDate != null && endDate != null) {
+            if(startDate.isAfter(endDate)) throw new InvalidDateException("A data informada não é válida");
         }
 
-        return noteRepository.findAll(blankStringToNull(site), blankStringToNull(equipment), start, end, pageable).map(NoteDTO::fromEntity);
+        return noteRepository.findAll(blankStringToNull(site), blankStringToNull(equipment), fromInstantToTimestamp(startDate), fromInstantToTimestamp(endDate), pageable).map(NoteDTO::fromEntity);
+    }
+
+    @Override
+    public NoteDTO findById(String id) {
+        Note existingNote = noteRepository.findById(id).orElseThrow(NoteNotFoundException::new);
+
+        return NoteDTO.fromEntity(existingNote);
     }
 
     @Override
@@ -70,20 +76,15 @@ public class NoteServiceImpl implements INoteService {
     }
 
     @Override
+    @Transactional
     public void delete(String noteId) {
-        Note existingNote = noteRepository.findById(noteId).orElseThrow(NoteNotFoundException::new);
-        noteRepository.delete(existingNote);
+        if(!noteRepository.existsById(noteId)) throw new NoteNotFoundException("Nota não encontrada a partir deste ID");
+        noteRepository.deleteById(noteId);
     }
 
 
-    private Timestamp stringDateToTimestamp(String date) {
-        if(date == null || date.isBlank()) return null;
-
-        try {
-            return Timestamp.from(Instant.parse(date));
-        } catch (DateTimeParseException ex) {
-            throw new InvalidDateException("A data informada é inválida");
-        }
+    private Timestamp fromInstantToTimestamp(Instant date) {
+        return date == null ? null : Timestamp.from(date);
     }
 
     private String blankStringToNull(String field) {
