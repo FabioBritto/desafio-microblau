@@ -1,7 +1,5 @@
 import { buildApiUrl, type Params } from "./util";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
-
 export class ValidationError extends Error {
     errors: Record<string, string>;
 

@@ -44,3 +44,14 @@ export function useUpdateNote() {
         },
     })
 }
+
+export function useDeleteNote() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => notesApi.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: notesKeys.all });
+        },
+    })
+}
