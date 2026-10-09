@@ -2,8 +2,13 @@ import { api } from "@/shared/lib/api";
 import type { CreateNoteDTO, Note, NotesFilters, PaginatedNote, UpdateNoteDTO } from "./schmeas";
 
 export const notesApi = {
-    list: (filters: NotesFilters, signal?: AbortSignal) =>
-        api.get<PaginatedNote>('notes', filters, signal),
+    list: (filters: NotesFilters, signal?: AbortSignal) => {
+        const { page, ...rest } = filters
+        return api.get<PaginatedNote>('notes', {
+            ...rest,
+            page: page == null ? undefined : Math.max(page - 1, 0),
+        }, signal)
+    },
     
     getById: (id: string, signal?: AbortSignal) =>
         api.get<Note>(`notes/${id}`,undefined, signal),

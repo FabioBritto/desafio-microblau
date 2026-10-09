@@ -1,10 +1,13 @@
+import { NotesPage } from './features/notes/NotesPage'
 import { Sidebar } from './shared/components/sidebar'
 
 export default function App() {
     return (
         <div className="flex min-h-screen bg-background">
             <Sidebar />
-            <main className="flex-1" />
+            <main className="min-w-0 flex-1">
+                <NotesPage />
+            </main>
         </div>
     )
 }
